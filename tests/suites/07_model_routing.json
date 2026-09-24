@@ -79,7 +79,7 @@
     {"id": "fast_synonym", "state": "Give me a synonym for 'indispensable'.", "expect": {"route": "fast_model", "difficulty": [0.4, 1.6]}},
     {"id": "fast_summarize_review", "state": "Summarize this review in one line: 'I bought the fridge, it arrived on time, but it came with a dent in the door. The technician replaced it in two days and was very polite.'", "expect": {"route": "fast_model", "difficulty": [0.4, 1.6]}},
     {"id": "fast_thank_you", "state": "Write a short thank-you message for a customer who made their first purchase at our clothing store.", "expect": {"route": "fast_model", "difficulty": [0.4, 1.6]}},
-    {"id": "fast_plural", "state": "What's the plural of 'cactus'?", "expect": {"route": "fast_model", "difficulty": [0, 0.9]}},
+    {"id": "fast_plural", "state": "What's the plural of 'cactus'?", "expect": {"route": "fast_model", "difficulty": [0.4, 1.6]}},
     {"id": "fast_german", "state": "How do you say 'thank you for choosing us' in German?", "expect": {"route": "fast_model", "difficulty": [0.4, 1.6]}},
     {"id": "fast_friendlier_message", "state": "Rewrite this message to sound friendlier: 'Your payment didn't go through. Fix it.'", "expect": {"route": "fast_model", "difficulty": [0.4, 1.6]}},
     {"id": "fast_british_english", "state": "Adapt this to British English: 'I'll put the check in the mail and meet you at the parking lot.'", "expect": {"route": "fast_model", "difficulty": [0.4, 1.6]}},

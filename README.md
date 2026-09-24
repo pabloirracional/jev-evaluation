@@ -145,7 +145,7 @@ Overall accuracy went from 96.4% to 97.9%. The lesson: Jev follows the question 
 4. **General rule over the exception.** When a chatbot answer applies a general rule and ignores an exception in the source (the late-rescheduling fee, the cats-only-on-Wednesdays rule), Jev sometimes rates it as supported.
 5. **Counterfeit slang.** "Mirror line" and "top grade" listings were approved.
 
-The new definitions also exposed three mistakes in our own expected answers: "give me a synonym", "say this in German" and "affect or effect?" are level-1 text tasks, but their expected range said level 0. We corrected those three ranges to level 1 (0.4–1.6). Jev's answers didn't change; only the scoring did. That raised routing from 96.4% to 98.0% and the total to **98.0%**. The four routing errors left are one route (a 40-page contract review sent to a human instead of the advanced model) and three difficulty scores rated above level 2.
+The new definitions also exposed three mistakes in our own expected answers: "give me a synonym", "say this in German", "affect or effect?" and "the plural of cactus" are level-1 text tasks, but their expected range said level 0. We corrected those four ranges to level 1 (0.4–1.6). Jev's answers didn't change; only the scoring did. That raised routing from 96.4% to 98.0% and the total to **98.0%**. The four routing errors left are one route (a 40-page contract review sent to a human instead of the advanced model) and three difficulty scores rated above level 2.
 
 ### Recommendations
 
