@@ -1,0 +1,14 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Run output (answers, logs, results page); created by jev_tests.py and build_artifact.py
+tests/results/
+
+# Local tooling
+.claude/settings.local.json
+__pycache__/
+*.pyc
+.venv/
+venv/

@@ -1,0 +1,349 @@
+<title>Jev Scoreboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#f3f4f1; --surface:#ffffff; --raised:#eceee9; --ink:#171c19; --ink-2:#3f4843; --muted:#66706a;
+  --hair:#dde1dc; --accent:#2c55c9; --accent-bg:#e7ecfa;
+  --good:#1e7a41; --good-bg:#e2f2e7; --warn:#9a6208; --warn-bg:#fbf0dc; --bad:#bf3528; --bad-bg:#fbe5e2;
+  --track:#e3e6e1;
+  --display:"Archivo","Arial Narrow",Arial,sans-serif;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#111412; --surface:#1a1e1c; --raised:#232825; --ink:#e8ebe9; --ink-2:#c3cac6; --muted:#98a29c;
+    --hair:#2e3531; --accent:#8aa6f2; --accent-bg:#1f2840;
+    --good:#58c783; --good-bg:#16291d; --warn:#e3aa4a; --warn-bg:#2e2412; --bad:#f2837a; --bad-bg:#351c19;
+    --track:#2a302c;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#111412; --surface:#1a1e1c; --raised:#232825; --ink:#e8ebe9; --ink-2:#c3cac6; --muted:#98a29c;
+  --hair:#2e3531; --accent:#8aa6f2; --accent-bg:#1f2840;
+  --good:#58c783; --good-bg:#16291d; --warn:#e3aa4a; --warn-bg:#2e2412; --bad:#f2837a; --bad-bg:#351c19;
+  --track:#2a302c;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:15px/1.55 var(--sans);margin:0;padding-inline:16px;padding-block:0 56px}
+.wrap{max-width:1200px;margin:0 auto;display:grid;gap:28px}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+h1,h2,h3{margin:0;text-wrap:balance}
+.label{font:600 11.5px/1.2 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.good{--c:var(--good);--cb:var(--good-bg)} .warn{--c:var(--warn);--cb:var(--warn-bg)} .bad{--c:var(--bad);--cb:var(--bad-bg)}
+
+/* summary */
+header.top{padding-block:32px 0;display:grid;gap:22px}
+.eyebrow{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
+.done-pill{font:600 12px/1 var(--mono);padding:6px 10px;border-radius:999px;background:var(--good-bg);color:var(--good)}
+h1{font:800 clamp(34px,5vw,52px)/1.02 var(--display);letter-spacing:-.01em}
+.lead{margin:0;max-width:68ch;color:var(--ink-2);font-size:16px}
+.summary{display:grid;grid-template-columns:minmax(220px,1.1fr) 2fr;gap:14px;align-items:stretch}
+@media (max-width:760px){.summary{grid-template-columns:1fr}}
+.score{background:var(--surface);border:1px solid var(--hair);border-radius:10px;padding:20px 22px;display:grid;gap:6px;align-content:center}
+.score .big{font:800 clamp(52px,7vw,72px)/1 var(--display);color:var(--good)}
+.score .sub{color:var(--ink-2)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--hair);border:1px solid var(--hair);border-radius:10px;overflow:hidden}
+.fact{background:var(--surface);padding:14px 16px;display:grid;gap:4px;align-content:start}
+.fact .v{font:700 24px/1.1 var(--display)}
+.fact .k{font-size:13px;color:var(--ink-2)}
+.fact .k small{display:block;color:var(--muted);font-size:12px}
+
+/* where it fails */
+.weak{display:grid;gap:12px}
+.weak-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.weak-item{background:var(--surface);border:1px solid var(--hair);border-radius:10px;padding:14px 16px;display:grid;gap:8px;text-align:left;cursor:pointer;align-content:start}
+.weak-item:hover{border-color:var(--bad)}
+.weak-item .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.weak-item b{font:600 14px var(--mono);overflow-wrap:anywhere}
+.weak-item .pct{font:700 22px/1 var(--display);color:var(--c)}
+.weak-item p{margin:0;font-size:13px;color:var(--ink-2)}
+.weak-item .go{font:500 12px var(--mono);color:var(--accent)}
+
+/* master-detail layout */
+.board{display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start}
+@media (max-width:920px){.board{grid-template-columns:1fr}}
+.side{display:grid;gap:10px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
+@media (max-width:920px){.side{position:static}}
+.side-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;background:var(--c)}
+.suites{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--hair);border-radius:10px;overflow:hidden}
+.suites li+li{border-top:1px solid var(--hair)}
+.srow{width:100%;border:0;background:transparent;text-align:left;cursor:pointer;padding:11px 14px;display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center}
+.srow:hover{background:var(--raised)}
+.srow[aria-current="true"]{background:var(--accent-bg);box-shadow:inset 3px 0 0 var(--accent)}
+.srow .t{font-weight:600;font-size:14px;line-height:1.3}
+.srow .p{font:700 16px/1 var(--display);color:var(--c)}
+.srow .bar{grid-column:1/-1;height:6px;background:var(--track);border-radius:3px;overflow:hidden}
+.srow .bar i{display:block;height:100%;background:var(--c);border-radius:3px}
+.srow .m{grid-column:1/-1;font:500 11.5px var(--mono);color:var(--muted)}
+
+/* detail */
+.detail{background:var(--surface);border:1px solid var(--hair);border-radius:12px;padding:22px clamp(16px,3vw,28px) 26px;display:grid;gap:24px;min-width:0}
+.dhead{display:grid;grid-template-columns:1fr auto;gap:8px 20px;align-items:start}
+@media (max-width:560px){.dhead{grid-template-columns:1fr}}
+.dhead h2{font:800 clamp(24px,3vw,32px)/1.08 var(--display)}
+.dhead .what{margin:4px 0 0;color:var(--ink-2);max-width:66ch}
+.dscore{text-align:right;display:grid;gap:2px}
+@media (max-width:560px){.dscore{text-align:left}}
+.dscore .big{font:800 40px/1 var(--display);color:var(--c)}
+.dscore small{color:var(--ink-2);font-size:13px}
+.section{display:grid;gap:10px}
+.qtable-wrap{overflow-x:auto}
+.qtable{width:100%;border-collapse:collapse;font-size:14px;min-width:520px}
+.qtable th{text-align:left;font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:0 10px 8px 0;border-bottom:1px solid var(--hair)}
+.qtable td{padding:10px 10px 10px 0;border-bottom:1px solid var(--hair);vertical-align:top}
+.qtable tr:last-child td{border-bottom:0}
+.qtable .qk{font:600 13px var(--mono)}
+.qtable .qi{color:var(--ink-2);font-size:13px;margin-top:2px}
+.qtable .qbar{display:grid;grid-template-columns:90px auto;gap:8px;align-items:center;white-space:nowrap}
+.qtable .qbar .track{height:6px;background:var(--track);border-radius:3px;overflow:hidden}
+.qtable .qbar i{display:block;height:100%;background:var(--c)}
+.qtable .qbar b{font:600 13px var(--mono);color:var(--c)}
+.type{font:600 10.5px/1 var(--mono);text-transform:uppercase;letter-spacing:.05em;padding:4px 6px;border-radius:4px;background:var(--raised);color:var(--ink-2);white-space:nowrap}
+.note{font-size:12.5px;color:var(--muted);margin:0}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--hair);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:transparent;padding:8px 12px;cursor:pointer;font-size:13.5px;display:inline-flex;gap:6px;align-items:center}
+.seg button+button{border-left:1px solid var(--hair)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.seg .n{font:600 12px var(--mono);opacity:.8}
+.toolbar input[type=search]{flex:1 1 220px;min-width:0;padding:8px 11px;border:1px solid var(--hair);border-radius:8px;background:var(--surface)}
+.shown{font:500 12px var(--mono);color:var(--muted)}
+
+.cases{display:grid;gap:10px}
+.case{border:1px solid var(--hair);border-radius:10px;padding:14px 16px;display:grid;gap:10px;border-left:4px solid var(--c)}
+.chead{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.cid{font:600 12.5px var(--mono);color:var(--ink-2);overflow-wrap:anywhere}
+.badge{font:600 11.5px/1 var(--mono);padding:5px 8px;border-radius:999px;background:var(--cb);color:var(--c);white-space:nowrap}
+.cnote{font-size:13px;color:var(--ink-2);background:var(--raised);padding:6px 10px;border-radius:6px}
+.cnote::before{content:"Why it's hard: ";font-weight:600}
+.state{font-size:14.5px;white-space:pre-wrap;overflow-wrap:anywhere;display:grid;gap:8px}
+.state .f{display:grid;gap:2px}
+.state .k{font:600 11px var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.state.clamp{max-height:9.5em;overflow:hidden;-webkit-mask-image:linear-gradient(#000 70%,transparent)}
+.more-btn{justify-self:start;border:0;background:none;padding:0;font:500 12.5px var(--mono);color:var(--accent);cursor:pointer}
+.answers{display:grid;gap:0;border:1px solid var(--hair);border-radius:8px;overflow:hidden}
+.ans{display:grid;grid-template-columns:minmax(110px,1.1fr) 1fr 1fr 22px;gap:10px;padding:8px 12px;align-items:baseline;font-size:13.5px}
+.ans+.ans{border-top:1px solid var(--hair)}
+.ans.head{background:var(--raised);font:600 10.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-block:6px}
+.ans .q{font:600 12.5px var(--mono);overflow-wrap:anywhere}
+.ans .v{font-family:var(--mono);font-size:13px}
+.ans .v small{color:var(--muted)}
+.ans .mk{font-weight:700;color:var(--c);text-align:right}
+.ans.bad{background:var(--bad-bg)}
+@media (max-width:520px){.ans{grid-template-columns:1fr 1fr 18px}.ans .q{grid-column:1/-1}.ans.head .q{display:none}}
+.load-more{justify-self:center;padding:9px 18px;border:1px solid var(--hair);border-radius:8px;background:var(--surface);cursor:pointer;font:600 13px var(--mono)}
+.load-more:hover{border-color:var(--ink)}
+.empty{color:var(--muted);padding:12px 0;margin:0}
+footer{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
+@media (prefers-reduced-motion: no-preference){.srow,.weak-item{transition:background .12s,border-color .12s}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow"><span class="label">TypeSafe · Jev model · fictional cases</span><span class="done-pill" id="done"></span></div>
+    <h1>Jev Scoreboard</h1>
+    <p class="lead" id="lead"></p>
+    <div class="summary">
+      <div class="score"><span class="label">Overall accuracy</span><span class="big num" id="overall"></span><span class="sub num" id="overall-sub"></span></div>
+      <div class="facts" id="facts"></div>
+    </div>
+  </header>
+
+  <section class="weak" aria-labelledby="weak-h">
+    <h2 class="label" id="weak-h">Where Jev fails most</h2>
+    <div class="weak-list" id="weak"></div>
+  </section>
+
+  <div class="board">
+    <aside class="side" aria-labelledby="side-h">
+      <div class="side-head"><h2 class="label" id="side-h">Suites, worst to best</h2></div>
+      <div class="legend"><span class="good">95% or more</span><span class="warn">85–95%</span><span class="bad">below 85%</span></div>
+      <ul class="suites" id="suites"></ul>
+    </aside>
+    <section class="detail" id="detail" aria-live="polite"></section>
+  </div>
+
+  <footer id="foot"></footer>
+</div>
+
+<script type="application/json" id="data">__DATA__</script>
+<script>
+(function(){
+  const D=JSON.parse(document.getElementById("data").textContent);
+  const $=s=>document.querySelector(s);
+  const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const br=n=>Number(n).toLocaleString("en-US");
+  const dec=n=>String(n);
+  const pctN=(a,b)=>b?100*a/b:0;
+  const pct=(a,b)=>b?pctN(a,b).toLocaleString("en-US",{maximumFractionDigits:1})+"%":"—";
+  const tone=p=>p>=95?"good":p>=85?"warn":"bad";
+  const typeLabel={choice:"choice",score:"score 0–3",noul:"yes / no"};
+  const T=D.totals, R=D.run||{};
+
+  // ---- per-question stats ----
+  D.suites.forEach(s=>{
+    const q={};
+    s.cases.forEach(c=>{
+      if(!c.res)return;
+      Object.entries(c.res).forEach(([k,r])=>{
+        const key=k+"|"+c.types[k];
+        q[key]=q[key]||{key:k,type:c.types[k],ok:0,n:0};
+        q[key].n++; q[key].ok+=r.ok?1:0;
+      });
+    });
+    s.qstats=Object.values(q).sort((a,b)=>pctN(a.ok,a.n)-pctN(b.ok,b.n));
+    s.errors=s.cases.filter(c=>c.res&&Object.values(c.res).some(r=>!r.ok)).length;
+    s.p=pctN(s.hits,s.ran_checks);
+  });
+
+  // ---- summary ----
+  $("#lead").textContent=`We sent Jev ${br(T.cases)} made-up cases, in ${D.suites.length} suites, and checked every answer against the right one. A case can have several questions, so there are more answers checked than cases.`;
+  const pending=T.cases-T.ran;
+  $("#done").textContent=pending?`${br(pending)} cases not run yet`:"All cases run";
+  if(pending)$("#done").style.cssText="background:var(--warn-bg);color:var(--warn)";
+  $("#overall").textContent=pct(T.hits,T.ran_checks);
+  $("#overall-sub").textContent=`${br(T.hits)} of ${br(T.ran_checks)} answers correct`;
+  const byType={};
+  D.suites.forEach(s=>s.qstats.forEach(q=>{byType[q.type]=byType[q.type]||[0,0];byType[q.type][0]+=q.ok;byType[q.type][1]+=q.n;}));
+  const facts=[
+    [br(T.ran),"cases run",`of ${br(T.cases)}, in ${D.suites.length} suites`],
+    [br(T.ran_checks-T.hits),"wrong answers",`in ${br(D.suites.reduce((a,s)=>a+s.errors,0))} cases`],
+  ];
+  if(R.latency_median_ms!=null)facts.push([`${br(R.latency_median_ms)} ms`,"typical time per call",`95% under ${(R.latency_p95_ms/1000).toFixed(1)} s`]);
+  if(R.cost_usd!=null)facts.push([`$${R.cost_usd.toFixed(2)}`,"cost of the full run",`${br(R.tokens)} tokens`]);
+  facts.push(...Object.entries(byType).map(([t,[o,n]])=>[pct(o,n),`${typeLabel[t]} questions`,`${br(o)} of ${br(n)}`]));
+  $("#facts").innerHTML=facts.map(([v,k,s])=>`<div class="fact"><span class="v num">${v}</span><span class="k">${k}<small>${s}</small></span></div>`).join("");
+
+  // ---- where it fails most (questions with the most errors) ----
+  const allQ=[];
+  D.suites.forEach((s,i)=>s.qstats.forEach(q=>{if(q.n-q.ok>0)allQ.push({...q,si:i,s});}));
+  allQ.sort((a,b)=>(b.n-b.ok)-(a.n-a.ok));
+  $("#weak").innerHTML=allQ.slice(0,3).map(q=>{
+    const p=pctN(q.ok,q.n);
+    return `<button type="button" class="weak-item ${tone(p)}" data-si="${q.si}">
+      <span class="row"><b>${esc(q.key)}</b><span class="pct num">${pct(q.ok,q.n)}</span></span>
+      <p>${esc(q.s.title)} · ${q.n-q.ok} errors in ${q.n} answers</p>
+      <span class="go">See the errors →</span></button>`;
+  }).join("");
+  $("#weak").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>select(+b.dataset.si,"wrong",true)));
+
+  // ---- suite list ----
+  const order=D.suites.map((s,i)=>i).sort((a,b)=>D.suites[a].p-D.suites[b].p);
+  $("#suites").innerHTML=order.map(i=>{
+    const s=D.suites[i];
+    return `<li><button type="button" class="srow ${tone(s.p)}" data-i="${i}">
+      <span class="t">${esc(s.title)}</span><span class="p num">${pct(s.hits,s.ran_checks)}</span>
+      <span class="bar"><i style="width:${s.p}%"></i></span>
+      <span class="m num">${s.cases.length} cases · ${s.errors?`${s.errors} with errors`:"no errors"}</span></button></li>`;
+  }).join("");
+  $("#suites").querySelectorAll(".srow").forEach(b=>b.addEventListener("click",()=>select(+b.dataset.i,null,window.matchMedia("(max-width:920px)").matches)));
+
+  // ---- detail ----
+  let cur=null,filter="all",query="",limit=25;
+  function qInstr(s,key){
+    const qs=s.questions||(s.cases.find(c=>c.questions&&c.questions[key])||{}).questions;
+    const q=qs&&qs[key];
+    return q?(typeof q.instructions==="string"?q.instructions:""):"";
+  }
+  function expLabel(t,e){
+    if(t==="noul")return e?"yes":"no";
+    if(t==="score")return `between ${dec(e[0])} and ${dec(e[1])}`;
+    return Array.isArray(e)?e.join(" or "):e;
+  }
+  function gotLabel(t,g){
+    if(t==="noul")return `${g>=.5?"yes":"no"} <small>(${dec(g)})</small>`;
+    return esc(t==="score"?dec(g):g);
+  }
+  function status(c){return !c.res?"pending":Object.values(c.res).every(r=>r.ok)?"right":"wrong";}
+  function renderState(st){
+    if(typeof st==="string")return esc(st);
+    return Object.entries(st).map(([k,v])=>`<span class="f"><span class="k">${esc(k.replace(/_/g," "))}</span><span>${esc(v)}</span></span>`).join("");
+  }
+
+  function select(i,f,scroll){
+    cur=D.suites[i];query="";limit=25;
+    filter=f||(cur.errors?"wrong":"all");
+    document.querySelectorAll(".srow").forEach(b=>b.setAttribute("aria-current",String(+b.dataset.i===i)));
+    const s=cur, t=tone(s.p);
+    const nOk=s.cases.filter(c=>status(c)==="right").length;
+    $("#detail").innerHTML=`
+      <div class="dhead ${t}">
+        <div><span class="label">${s.source==="generator"?"cases generated by code":"hand-written cases"}</span>
+          <h2>${esc(s.title)}</h2><p class="what">${esc(s.what)}</p></div>
+        <div class="dscore"><span class="big num">${pct(s.hits,s.ran_checks)}</span><small class="num">${br(s.hits)} of ${br(s.ran_checks)} answers correct</small></div>
+      </div>
+      <div class="section">
+        <h3 class="label">Accuracy by question</h3>
+        <div class="qtable-wrap"><table class="qtable"><thead><tr><th>Question asked of Jev</th><th>Type</th><th>Accuracy</th></tr></thead><tbody>
+        ${s.qstats.map(q=>{const p=pctN(q.ok,q.n);return `<tr class="${tone(p)}"><td><div class="qk">${esc(q.key)}</div><div class="qi">${esc(qInstr(s,q.key))}</div></td>
+          <td><span class="type">${typeLabel[q.type]}</span></td>
+          <td><div class="qbar"><span class="track"><i style="width:${p}%"></i></span><b class="num">${pct(q.ok,q.n)} <span style="color:var(--muted);font-weight:500">· ${q.n-q.ok} errors</span></b></div></td></tr>`;}).join("")}
+        </tbody></table></div>
+        ${s.qstats.some(q=>q.type==="score")?`<p class="note">Scores go from 0 to 3. A case counts as correct when Jev's score falls within the expected range.</p>`:""}
+      </div>
+      <div class="section">
+        <h3 class="label">Cases</h3>
+        <div class="toolbar">
+          <div class="seg" role="group" aria-label="Filter cases">
+            <button type="button" data-f="wrong">Errors <span class="n">${s.errors}</span></button>
+            <button type="button" data-f="right">Correct <span class="n">${nOk}</span></button>
+            <button type="button" data-f="all">All <span class="n">${s.cases.length}</span></button>
+          </div>
+          <label for="q" hidden>Search cases</label>
+          <input type="search" id="q" placeholder="Search the text or the case id">
+          <span class="shown" id="shown"></span>
+        </div>
+        <div class="cases" id="cases"></div>
+      </div>`;
+    $("#detail").querySelectorAll(".seg button").forEach(b=>{
+      b.setAttribute("aria-pressed",String(b.dataset.f===filter));
+      b.addEventListener("click",()=>{filter=b.dataset.f;limit=25;$("#detail").querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));renderCases();});
+    });
+    $("#q").addEventListener("input",e=>{query=e.target.value.toLowerCase();limit=25;renderCases();});
+    renderCases();
+    if(location.hash!=="#"+s.name)history.replaceState(null,"","#"+s.name);
+    if(scroll)$("#detail").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
+  }
+
+  function renderCases(){
+    const list=cur.cases.filter(c=>(filter==="all"||status(c)===filter)&&(!query||JSON.stringify([c.id,c.state,c.note||""]).toLowerCase().includes(query)));
+    $("#shown").textContent=list.length?`showing ${Math.min(limit,list.length)} of ${list.length}`:"";
+    const box=$("#cases");
+    if(!list.length){box.innerHTML=`<p class="empty">${filter==="wrong"&&!query?"Jev got every case in this suite right.":"No cases match this filter."}</p>`;return;}
+    box.innerHTML=list.slice(0,limit).map(c=>{
+      const st=status(c), t=st==="right"?"good":st==="wrong"?"bad":"warn";
+      const long=JSON.stringify(c.state).length>420;
+      const rows=Object.entries(c.expect).map(([k,e])=>{
+        const ty=c.types[k], r=c.res&&c.res[k];
+        const got=r?gotLabel(ty,r.got)+(r.conf!=null?` <small>· conf. ${dec(r.conf)}</small>`:""):"—";
+        const cls=r?(r.ok?"good":"bad"):"";
+        return `<div class="ans ${cls}"><span class="q">${esc(k)}</span><span class="v">${esc(expLabel(ty,e))}</span><span class="v">${got}</span><span class="mk">${r?(r.ok?"✓":"✕"):""}</span></div>`;
+      }).join("");
+      return `<article class="case ${t}">
+        <div class="chead"><span class="cid">${esc(c.id)}</span><span class="badge">${st==="right"?"✓ right":st==="wrong"?"✕ wrong":"not run"}</span></div>
+        <div class="state${long?" clamp":""}">${renderState(c.state)}</div>
+        ${long?`<button class="more-btn" type="button">Show full text</button>`:""}
+        ${c.note?`<div class="cnote">${esc(c.note)}</div>`:""}
+        <div class="answers"><div class="ans head"><span class="q">Question</span><span>Expected</span><span>Jev answered</span><span></span></div>${rows}</div>
+      </article>`;
+    }).join("")+(list.length>limit?`<button class="load-more" type="button" id="more">Show ${Math.min(25,list.length-limit)} more</button>`:"");
+    box.querySelectorAll(".more-btn").forEach(b=>b.addEventListener("click",()=>{const s=b.previousElementSibling;s.classList.toggle("clamp");b.textContent=s.classList.contains("clamp")?"Show full text":"Collapse";}));
+    const more=$("#more");if(more)more.addEventListener("click",()=>{limit+=25;renderCases();});
+  }
+
+  $("#foot").innerHTML=`<span>Model: ${esc(R.model||"—")}. One check per question: “yes / no” uses a 0.5 cutoff; “score” must fall within the expected range; “choice” must be the right option.</span><span>All cases, companies and people are fictional.</span>`;
+
+  const fromHash=D.suites.findIndex(s=>"#"+s.name===location.hash);
+  select(fromHash>=0?fromHash:order[0],null,false);
+})();
+</script>

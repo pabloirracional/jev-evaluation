@@ -1,0 +1,108 @@
+# Jev evaluation
+
+A test suite that measures where TypeSafe's Jev model can replace a large LLM, where it can't, and how to use the two together. All cases are fictional and in English.
+
+## What Jev is
+
+Jev (TypeSafe, model `jev-latest`) is a small, specialized model. It does not write text or hold a conversation. It reads a text and answers **fixed questions about it** with structured values, plus a confidence for each answer:
+
+| Question type | Jev returns | Counts as correct when |
+|---|---|---|
+| `choice` | One option from a list | It is the expected option (or one of the accepted ones) |
+| `noul` (yes / no) | A probability from 0 to 1 | It falls on the expected side of 0.5 |
+| `score` | A number from 0 to 3 | It falls within the expected range |
+
+That makes Jev a **judge, not a writer**: it labels, checks and filters text at a volume and price where calling a large LLM for every item doesn't make sense.
+
+## Jev or a large LLM?
+
+Large general-purpose models, such as Claude Opus and GPT Astra, can do everything Jev does. The question is whether they're worth their cost and latency for each task.
+
+**Use Jev when:**
+- The answer is a label, a yes / no or a score, not free text: triage, routing, moderation, intent, "is this field correct?", "is this answer supported by the source?".
+- Volume is high and every call has to be fast and cheap.
+- You need a number to act on. Every answer has a probability and a confidence, so you can set cutoffs and send uncertain cases elsewhere.
+- The same questions repeat on every item, which keeps results consistent and measurable.
+- It sits in the path of every request, like an input guardrail or a check on an LLM's output.
+
+**Use a large LLM when:**
+- The output is text: replies, summaries, copy, code, explanations.
+- The task needs reasoning or knowledge, not just reading.
+- The criteria are vague or subjective. Jev follows the question literally.
+- You want to predict a business outcome rather than describe what the text says.
+
+**Using both together:**
+1. **Triage and route:** Jev classifies every item, and the large LLM handles only the ones that need a written answer.
+2. **Escalate by confidence:** Jev answers below a confidence cutoff go to the large LLM or a person.
+3. **Guard the input:** Jev screens requests before they reach the large LLM.
+4. **Verify the output:** Jev checks the large LLM's answer against the source, or checks fields it extracted.
+5. **Let the large LLM write Jev's questions:** Jev is only as good as its questions, and these suites measure whether a new wording is better.
+
+The suites below test each of these patterns.
+
+## What we test
+
+12 suites, 1,352 cases. Each suite is one use case: a set of questions, cases with the correct answer, and a note on what makes the hard cases hard.
+
+| # | Suite | Pattern | What it checks | Questions | Cases |
+|---|---|---|---|---|---|
+| 01 | `support_triage` | Triage | Right team, severity and refund request in a single support ticket | `team` choice · `severity` score · `wants_refund` yes/no | 132 |
+| 02 | `input_guardrails` | Guard the input | Jailbreak, dangerous request, medical advice, self-harm signal and severity, in one call | 4 yes/no · `severity` score | 125 |
+| 03 | `llm_answer_check` | Verify the output | Whether a chatbot answer is supported by the source, contradicts it, or doesn't answer the question | `supported` · `contradicts` · `answers` yes/no | 114 |
+| 04 | `extraction_check` | Verify the output | Whether a field extracted from an invoice matches the document, including swapped digits and mixed-up fields | `matches` yes/no | 105 |
+| 05 | `rag_relevance` | Filter | How much a retrieved passage helps answer a question: directly, partly, same topic only, or not at all | `relevance` score | 108 |
+| 06 | `same_product` | Filter | Whether two catalog listings are the same product or a different variant (size, voltage, version, quantity, accessory) | `same_product` yes/no | 105 |
+| 07 | `model_routing` | Route | Canned answer, cheap LLM, advanced LLM or human agent, plus how hard the request is | `route` choice · `difficulty` score | 112 |
+| 08 | `marketplace_moderation` | Filter | Approve a listing or block it as counterfeit, prohibited or a misleading claim | `decision` choice | 106 |
+| 09 | `smart_home` | Triage | Turn a voice command into action + room, including negation and non-commands | `action` · `room` choice | 105 |
+| 10 | `churn_risk` | Triage | How close a customer is to canceling, and whether they mention a competitor or ask for a discount | `risk` score · 2 yes/no | 122 |
+| 11 | `resume_screening` | Filter | Score candidates on separate skills (Python, APIs, SQL, cloud) so code can weight them | 3 scores · `cloud` yes/no | 113 |
+| 12 | `known_weaknesses` | Limits | TypeSafe's own list of known failures: negation, counting, dates, hex colors, hidden instructions, noise, literal reading | one yes/no or choice per case | 105 |
+
+Suites 04, 06, 09 and 12 are mostly generated by `tests/generate_cases.py`, because their right answer can be computed. The others are written by hand.
+
+For every run we measure:
+- **Accuracy** per question, per suite and overall.
+- **Confidence** on correct vs wrong answers, to test whether a confidence cutoff catches errors.
+- **Latency** (median and p95) and **cost** per run.
+- **Stability**, with `--repeat 3`: whether the same case gets the same answer across runs.
+
+## Setup
+
+Requires Python 3.9+ and no extra packages.
+
+1. Copy `.env.example` to `.env` in the project root:
+   ```powershell
+   Copy-Item .env.example .env
+   ```
+2. Fill in `TYPESAFE_API_KEY` with your Vercel AI Gateway key (`vck_...`). Jev is called through the gateway; the URL and rate limit are already set.
+
+Every script reads `.env` automatically. A variable already set in the terminal takes precedence over `.env`. `.env` is git-ignored: never commit it or paste keys into code.
+
+## Running
+
+```powershell
+cd tests
+python jev_tests.py list                          # show the suites
+python jev_tests.py run                           # run everything; resumes where it stopped
+python jev_tests.py run --suite support_triage    # one suite
+python jev_tests.py run --repeat 3                # stability test
+python jev_tests.py run --limit 5                 # quick test: only 5 calls
+python jev_tests.py report                        # accuracy report, with every error listed
+python build_artifact.py                          # results page: tests/results/jev-scoreboard.html
+python generate_cases.py                          # regenerate the g_* cases of suites 04, 06, 09, 12
+```
+
+A full run is 1,352 calls. The Vercel AI Gateway allows 30 calls per minute, so the runner paces itself at 28 and a full run takes about 50 minutes. If a run stops, `run` picks up where it left off.
+
+## Repository layout
+
+| Path | What it is |
+|---|---|
+| `tests/suites/*.json` | The 12 suites: questions, cases and expected answers |
+| `tests/jev_tests.py` | Test runner (`list`, `run`, `report`) |
+| `tests/generate_cases.py` | Generates the computed cases for suites 04, 06, 09 and 12 |
+| `tests/build_artifact.py` + `artifact_template.html` | Build the results page |
+| `tests/results/` | Jev's answers and the results page, created by a run |
+| `local_env.py` | Loads `.env` into the environment |
+| `.env.example` | Template for `.env` |

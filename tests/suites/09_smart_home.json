@@ -1,0 +1,154 @@
+{
+  "name": "smart_home",
+  "title": "Voice command to action (smart home)",
+  "what_it_tests": "Turn a sentence into action + room, like a function call. Includes sentences with no command and sentences with negation.",
+  "questions": {
+    "action": {
+      "type": "choice",
+      "instructions": "Which action the person wants the house to perform now",
+      "criteria": {
+        "lights_on": {
+          "what": "Turn lights on"
+        },
+        "lights_off": {
+          "what": "Turn lights off"
+        },
+        "adjust_temperature": {
+          "what": "Change the air conditioning or heating"
+        },
+        "play_music": {
+          "what": "Play music"
+        },
+        "lock_door": {
+          "what": "Close or lock a door or gate"
+        },
+        "none": {
+          "what": "No action should be performed now"
+        }
+      }
+    },
+    "room": {
+      "type": "choice",
+      "instructions": "In which room the action should happen",
+      "criteria": {
+        "living_room": null,
+        "kitchen": null,
+        "bedroom": null,
+        "garage": null,
+        "whole_house": {
+          "what": "All rooms"
+        },
+        "not_specified": {
+          "what": "The sentence doesn't say the room"
+        }
+      }
+    }
+  },
+  "cases": [
+    {"id": "kitchen_off", "state": "Turn off the kitchen light", "expect": {"action": "lights_off", "room": "kitchen"}},
+    {"id": "hot_bedroom", "state": "It's way too hot here in the bedroom", "expect": {"action": "adjust_temperature", "room": "bedroom"}, "note": "implicit request"},
+    {"id": "music_living_room", "state": "Put on some upbeat music in the living room", "expect": {"action": "play_music", "room": "living_room"}},
+    {"id": "close_garage", "state": "Close the garage door, I'm going to bed", "expect": {"action": "lock_door", "room": "garage"}},
+    {"id": "all_on", "state": "Turn everything on, we have guests", "expect": {"action": "lights_on", "room": "whole_house"}},
+    {"id": "what_time", "state": "What time is it?", "expect": {"action": "none"}},
+    {"id": "dont_turn_off", "state": "No need to turn off the living room light yet", "expect": {"action": "none", "room": "living_room"}, "note": "negation"},
+    {"id": "lights_on", "state": "Turn on the light", "expect": {"action": "lights_on", "room": "not_specified"}},
+    {"id": "g_cmd96", "state": "Lights in the kitchen: on", "expect": {"action": "lights_on", "room": "kitchen"}},
+    {"id": "g_cmd155", "state": "It's an oven in the living room", "expect": {"action": "adjust_temperature", "room": "living_room"}},
+    {"id": "g_cmd153", "state": "Turn off the light in the family room", "expect": {"action": "lights_off", "room": "living_room"}},
+    {"id": "g_cmd146", "state": "Make the TV room a bit cooler", "expect": {"action": "adjust_temperature", "room": "living_room"}},
+    {"id": "g_none49", "state": "How much energy did I use this month?", "expect": {"action": "none"}, "note": "nothing should be executed"},
+    {"id": "g_noroom42", "state": "Put on some rock", "expect": {"action": "play_music", "room": "not_specified"}},
+    {"id": "g_cmd237", "state": "Make sure the door to the kids' bedroom is locked", "expect": {"action": "lock_door", "room": "bedroom"}},
+    {"id": "g_all78", "state": "Lock all the doors in the house", "expect": {"action": "lock_door", "room": "whole_house"}},
+    {"id": "g_none114", "state": "Leave the door to my bedroom as it is", "expect": {"action": "none", "room": "bedroom"}, "note": "nothing should be executed"},
+    {"id": "g_cmd195", "state": "Set the AC in the garage to 72 degrees", "expect": {"action": "adjust_temperature", "room": "garage"}},
+    {"id": "g_cmd169", "state": "I left the light on in the living room, turn it off for me", "expect": {"action": "lights_off", "room": "living_room"}},
+    {"id": "g_none70", "state": "Is the light in the TV room on?", "expect": {"action": "none", "room": "living_room"}, "note": "nothing should be executed"},
+    {"id": "g_cmd73", "state": "Lights in the garage: off", "expect": {"action": "lights_off", "room": "garage"}},
+    {"id": "g_cmd284", "state": "Lights in the kids' bedroom: off", "expect": {"action": "lights_off", "room": "bedroom"}},
+    {"id": "g_none145", "state": "No need to turn off the light in the kitchen yet", "expect": {"action": "none", "room": "kitchen"}, "note": "nothing should be executed"},
+    {"id": "g_cmd52", "state": "Lights in the garage: on", "expect": {"action": "lights_on", "room": "garage"}},
+    {"id": "g_cmd116", "state": "It's dark in the kitchen", "expect": {"action": "lights_on", "room": "kitchen"}},
+    {"id": "g_none363", "state": "Yesterday the light in my bedroom stayed on all night", "expect": {"action": "none", "room": "bedroom"}, "note": "nothing should be executed"},
+    {"id": "g_cmd352", "state": "It's way too hot in my bedroom", "expect": {"action": "adjust_temperature", "room": "bedroom"}},
+    {"id": "g_cmd162", "state": "Can you lock the door to the garage?", "expect": {"action": "lock_door", "room": "garage"}},
+    {"id": "g_cmd129", "state": "Close the door to the bedroom", "expect": {"action": "lock_door", "room": "bedroom"}},
+    {"id": "g_noroom5", "state": "Turn the light on here", "expect": {"action": "lights_on", "room": "not_specified"}},
+    {"id": "g_cmd340", "state": "Put some tunes on in the garage", "expect": {"action": "play_music", "room": "garage"}},
+    {"id": "g_cmd26", "state": "Warm up the garage, it's freezing", "expect": {"action": "adjust_temperature", "room": "garage"}},
+    {"id": "g_none119", "state": "Don't turn on the AC in the TV room now, it's fine as it is", "expect": {"action": "none", "room": "living_room"}, "note": "nothing should be executed"},
+    {"id": "g_cmd160", "state": "Turn on the light in my bedroom", "expect": {"action": "lights_on", "room": "bedroom"}},
+    {"id": "g_cmd30", "state": "Start the workout playlist in the garage", "expect": {"action": "play_music", "room": "garage"}},
+    {"id": "g_cmd18", "state": "Lights in the bedroom: on", "expect": {"action": "lights_on", "room": "bedroom"}},
+    {"id": "g_cmd55", "state": "Make the family room a bit cooler", "expect": {"action": "adjust_temperature", "room": "living_room"}},
+    {"id": "g_noroom17", "state": "Turn off the light", "expect": {"action": "lights_off", "room": "not_specified"}},
+    {"id": "g_none8", "state": "Is the light in the kitchen on?", "expect": {"action": "none", "room": "kitchen"}, "note": "nothing should be executed"},
+    {"id": "g_none85", "state": "Yesterday the light in the kitchen stayed on all night", "expect": {"action": "none", "room": "kitchen"}, "note": "nothing should be executed"},
+    {"id": "g_cmd3", "state": "It's an oven in the garage", "expect": {"action": "adjust_temperature", "room": "garage"}},
+    {"id": "g_cmd248", "state": "Close the door to the kids' bedroom", "expect": {"action": "lock_door", "room": "bedroom"}},
+    {"id": "g_all54", "state": "Turn on the AC in every room", "expect": {"action": "adjust_temperature", "room": "whole_house"}},
+    {"id": "g_cmd321", "state": "Put on some samba in the living room", "expect": {"action": "play_music", "room": "living_room"}},
+    {"id": "g_none383", "state": "Remind me to buy a light bulb for the living room", "expect": {"action": "none", "room": "living_room"}, "note": "nothing should be executed"},
+    {"id": "g_none63", "state": "What's the weather forecast for tomorrow?", "expect": {"action": "none"}, "note": "nothing should be executed"},
+    {"id": "g_cmd369", "state": "Close the door to the kitchen", "expect": {"action": "lock_door", "room": "kitchen"}},
+    {"id": "g_none244", "state": "Don't play anything in the kids' bedroom now, the baby is sleeping", "expect": {"action": "none", "room": "bedroom"}, "note": "nothing should be executed"},
+    {"id": "g_none74", "state": "Don't play anything in the garage now, the baby is sleeping", "expect": {"action": "none", "room": "garage"}, "note": "nothing should be executed"},
+    {"id": "g_cmd142", "state": "It's dark in the bedroom", "expect": {"action": "lights_on", "room": "bedroom"}},
+    {"id": "g_cmd164", "state": "Can you turn off the light in the TV room? I already left", "expect": {"action": "lights_off", "room": "living_room"}},
+    {"id": "g_cmd27", "state": "Start the workout playlist in the kitchen", "expect": {"action": "play_music", "room": "kitchen"}},
+    {"id": "g_cmd344", "state": "I left the light on in the kids' bedroom, turn it off for me", "expect": {"action": "lights_off", "room": "bedroom"}},
+    {"id": "g_noroom67", "state": "Turn on the light", "expect": {"action": "lights_on", "room": "not_specified"}},
+    {"id": "g_none332", "state": "Is the light in the bedroom on?", "expect": {"action": "none", "room": "bedroom"}, "note": "nothing should be executed"},
+    {"id": "g_cmd175", "state": "Put some tunes on in the kids' bedroom", "expect": {"action": "play_music", "room": "bedroom"}},
+    {"id": "g_cmd14", "state": "Play some music in the kitchen", "expect": {"action": "play_music", "room": "kitchen"}},
+    {"id": "g_cmd170", "state": "Can you light up the garage?", "expect": {"action": "lights_on", "room": "garage"}},
+    {"id": "g_none380", "state": "Don't play anything in the TV room now, the baby is sleeping", "expect": {"action": "none", "room": "living_room"}, "note": "nothing should be executed"},
+    {"id": "g_cmd89", "state": "Put on some samba in my bedroom", "expect": {"action": "play_music", "room": "bedroom"}},
+    {"id": "g_cmd125", "state": "Can you lock the door to the TV room?", "expect": {"action": "lock_door", "room": "living_room"}},
+    {"id": "g_noroom86", "state": "It's way too hot", "expect": {"action": "adjust_temperature", "room": "not_specified"}},
+    {"id": "g_cmd301", "state": "Switch on the lights in the kitchen, please", "expect": {"action": "lights_on", "room": "kitchen"}},
+    {"id": "g_cmd128", "state": "Switch on the lights in the TV room, please", "expect": {"action": "lights_on", "room": "living_room"}},
+    {"id": "g_cmd64", "state": "It's dark in the living room", "expect": {"action": "lights_on", "room": "living_room"}},
+    {"id": "g_cmd331", "state": "Turn on the light in the bedroom", "expect": {"action": "lights_on", "room": "bedroom"}},
+    {"id": "g_none40", "state": "Is the light in the garage on?", "expect": {"action": "none", "room": "garage"}, "note": "nothing should be executed"},
+    {"id": "g_cmd134", "state": "Turn on the light in the living room", "expect": {"action": "lights_on", "room": "living_room"}},
+    {"id": "g_cmd328", "state": "Can you lock the door to my bedroom?", "expect": {"action": "lock_door", "room": "bedroom"}},
+    {"id": "g_cmd316", "state": "It's an oven in the family room", "expect": {"action": "adjust_temperature", "room": "living_room"}},
+    {"id": "g_cmd156", "state": "Lock the door to the kitchen", "expect": {"action": "lock_door", "room": "kitchen"}},
+    {"id": "g_noroom32", "state": "Play some music", "expect": {"action": "play_music", "room": "not_specified"}},
+    {"id": "g_none234", "state": "Remind me to buy a light bulb for the TV room", "expect": {"action": "none", "room": "living_room"}, "note": "nothing should be executed"},
+    {"id": "g_cmd43", "state": "Switch off the lights in the bedroom", "expect": {"action": "lights_off", "room": "bedroom"}},
+    {"id": "g_noroom90", "state": "Can you turn off the light?", "expect": {"action": "lights_off", "room": "not_specified"}},
+    {"id": "g_noroom51", "state": "Light, please", "expect": {"action": "lights_on", "room": "not_specified"}},
+    {"id": "g_cmd24", "state": "Play some music in the bedroom", "expect": {"action": "play_music", "room": "bedroom"}},
+    {"id": "g_cmd1", "state": "Start the workout playlist in the living room", "expect": {"action": "play_music", "room": "living_room"}},
+    {"id": "g_none76", "state": "Don't turn on the AC in the garage now, it's fine as it is", "expect": {"action": "none", "room": "garage"}, "note": "nothing should be executed"},
+    {"id": "g_none171", "state": "No need to turn off the light in the kids' bedroom yet", "expect": {"action": "none", "room": "bedroom"}, "note": "nothing should be executed"},
+    {"id": "g_cmd181", "state": "Make sure the door to the bedroom is locked", "expect": {"action": "lock_door", "room": "bedroom"}},
+    {"id": "g_all161", "state": "Warm up the whole house, it's freezing", "expect": {"action": "adjust_temperature", "room": "whole_house"}},
+    {"id": "g_cmd58", "state": "Switch on the lights in the garage, please", "expect": {"action": "lights_on", "room": "garage"}},
+    {"id": "g_cmd75", "state": "Set the AC in the bedroom to 72 degrees", "expect": {"action": "adjust_temperature", "room": "bedroom"}},
+    {"id": "g_noroom121", "state": "Turn up the heater", "expect": {"action": "adjust_temperature", "room": "not_specified"}},
+    {"id": "g_noroom276", "state": "Switch that light off", "expect": {"action": "lights_off", "room": "not_specified"}},
+    {"id": "g_cmd62", "state": "Switch on the lights in the family room, please", "expect": {"action": "lights_on", "room": "living_room"}},
+    {"id": "g_cmd72", "state": "Lower the temperature in the garage", "expect": {"action": "adjust_temperature", "room": "garage"}},
+    {"id": "g_none56", "state": "Thanks!", "expect": {"action": "none"}, "note": "nothing should be executed"},
+    {"id": "g_noroom94", "state": "I want to hear my playlist", "expect": {"action": "play_music", "room": "not_specified"}},
+    {"id": "g_cmd283", "state": "Set the AC in the TV room to 72 degrees", "expect": {"action": "adjust_temperature", "room": "living_room"}},
+    {"id": "g_none154", "state": "Is the light in my bedroom on?", "expect": {"action": "none", "room": "bedroom"}, "note": "nothing should be executed"},
+    {"id": "g_cmd201", "state": "Can you turn off the light in the bedroom? I already left", "expect": {"action": "lights_off", "room": "bedroom"}},
+    {"id": "g_cmd242", "state": "Lower the temperature in my bedroom", "expect": {"action": "adjust_temperature", "room": "bedroom"}},
+    {"id": "g_cmd333", "state": "Put on some samba in the kitchen", "expect": {"action": "play_music", "room": "kitchen"}},
+    {"id": "g_cmd149", "state": "Make the garage a bit cooler", "expect": {"action": "adjust_temperature", "room": "garage"}},
+    {"id": "g_cmd217", "state": "Can you light up my bedroom?", "expect": {"action": "lights_on", "room": "bedroom"}},
+    {"id": "g_cmd213", "state": "Warm up the TV room, it's freezing", "expect": {"action": "adjust_temperature", "room": "living_room"}},
+    {"id": "g_cmd112", "state": "Play some music in the living room", "expect": {"action": "play_music", "room": "living_room"}},
+    {"id": "g_cmd265", "state": "I want to hear jazz in my bedroom", "expect": {"action": "play_music", "room": "bedroom"}},
+    {"id": "g_none23", "state": "Yesterday the light in the family room stayed on all night", "expect": {"action": "none", "room": "living_room"}, "note": "nothing should be executed"},
+    {"id": "g_cmd295", "state": "It's dark in my bedroom", "expect": {"action": "lights_on", "room": "bedroom"}},
+    {"id": "g_cmd165", "state": "Put on some samba in the family room", "expect": {"action": "play_music", "room": "living_room"}},
+    {"id": "g_cmd391", "state": "I left the light on in the kitchen, turn it off for me", "expect": {"action": "lights_off", "room": "kitchen"}},
+    {"id": "g_cmd256", "state": "Start the workout playlist in the TV room", "expect": {"action": "play_music", "room": "living_room"}}
+  ]
+}
