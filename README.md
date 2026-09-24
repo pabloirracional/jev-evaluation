@@ -86,7 +86,7 @@ With direct access to the TypeSafe API, the whole suite would run about **40x fa
 | 04 | `extraction_check` | Verify the output | Whether a field extracted from an invoice matches the document, including swapped digits and mixed-up fields | `matches` yes/no | 105 | 100% |
 | 05 | `rag_relevance` | Filter | How much a retrieved passage helps answer a question: directly, partly, same topic only, or not at all | `relevance` score | 108 | 94.4% |
 | 06 | `same_product` | Filter | Whether two catalog listings are the same product or a different variant (size, voltage, version, quantity, accessory) | `same_product` yes/no | 105 | 100% |
-| 07 | `model_routing` | Route | Canned answer, cheap LLM, advanced LLM or human agent, plus how hard the request is | `route` choice · `difficulty` score | 112 | 96.4% |
+| 07 | `model_routing` | Route | Canned answer, cheap LLM, advanced LLM or human agent, plus how hard the request is | `route` choice · `difficulty` score | 112 | 98.0% |
 | 08 | `marketplace_moderation` | Filter | Approve a listing or block it as counterfeit, prohibited or a misleading claim | `decision` choice | 106 | 98.1% |
 | 09 | `smart_home` | Triage | Turn a voice command into action + room, including negation and non-commands | `action` · `room` choice | 105 | 95.1% |
 | 10 | `churn_risk` | Triage | How close a customer is to canceling, and whether they mention a competitor or ask for a discount | `risk` score · 2 yes/no | 122 | 99.2% |
@@ -109,11 +109,11 @@ Run of 2026-09-24, all 1,352 cases, model `jev-latest`, through the Vercel AI Ga
 
 | Metric | Result |
 |---|---|
-| **Overall accuracy** | **97.9%** (2,778 of 2,839 answers) |
+| **Overall accuracy** | **98.0%** (2,781 of 2,839 answers) |
 | Choice questions | 96.8% (550 of 568) |
 | Yes / no questions | 99.5% (1,405 of 1,412) |
-| Score questions | 95.8% (823 of 859) |
-| Average confidence | 0.93 when right, 0.67 when wrong |
+| Score questions | 96.2% (826 of 859) |
+| Average confidence | 0.93 when right, 0.65 when wrong |
 | Latency per call | median 411 ms, p95 622 ms |
 | Cost of the full run | $0.026 (616,563 input tokens) |
 
@@ -123,7 +123,7 @@ Run of 2026-09-24, all 1,352 cases, model `jev-latest`, through the Vercel AI Ga
 - **Yes / no questions are near perfect once they're well defined:** 99.5% across all suites.
 - **Classification is strong:** LLM answer check 99.1%, churn risk 99.2%, resume screening 99.0%, moderation 98.1%, input guardrails 97.8%.
 - **Routing decisions are right:** the route was right in 111 of 112 cases.
-- **Confidence tracks errors:** wrong answers average 0.67 confidence against 0.93 for right ones, so a confidence cutoff sends most errors to a second opinion.
+- **Confidence tracks errors:** wrong answers average 0.65 confidence against 0.93 for right ones, so a confidence cutoff sends most errors to a second opinion.
 
 ### Rewording three questions
 
@@ -135,7 +135,7 @@ The first full run scored 96.4%. Three questions caused most of the errors, and 
 | `difficulty` (routing) | Levels "Trivial / Simple / Requires reasoning / Very complex" | "Judge the task itself, not how long or short the message is", with a concrete example for each level (look up a fact, short text task, expert reasoning, large multi-part work) | 87.8% → **96.4%** |
 | `mentions_competitor` (churn risk) | "The customer mentions a competing service" | "…names a specific competing company or service. Vague references without a name, such as 'another app' … do not count" | 97.5% → **99.2%** |
 
-Overall accuracy went from 96.4% to **97.9%**. The lesson: Jev follows the question literally, so precise wording with examples matters more than anything else.
+Overall accuracy went from 96.4% to 97.9%. The lesson: Jev follows the question literally, so precise wording with examples matters more than anything else.
 
 ### Where it still fails
 
@@ -145,7 +145,7 @@ Overall accuracy went from 96.4% to **97.9%**. The lesson: Jev follows the quest
 4. **General rule over the exception.** When a chatbot answer applies a general rule and ignores an exception in the source (the late-rescheduling fee, the cats-only-on-Wednesdays rule), Jev sometimes rates it as supported.
 5. **Counterfeit slang.** "Mirror line" and "top grade" listings were approved.
 
-Three of the remaining routing errors are ours: under the new definitions, "give me a synonym", "say this in German" and "affect or effect?" are level-1 text tasks, but their expected range still says level 0.
+The new definitions also exposed three mistakes in our own expected answers: "give me a synonym", "say this in German" and "affect or effect?" are level-1 text tasks, but their expected range said level 0. We corrected those three ranges to level 1 (0.4–1.6). Jev's answers didn't change; only the scoring did. That raised routing from 96.4% to 98.0% and the total to **98.0%**. The four routing errors left are one route (a 40-page contract review sent to a human instead of the advanced model) and three difficulty scores rated above level 2.
 
 ### Recommendations
 
