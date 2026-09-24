@@ -13,7 +13,7 @@
     },
     "answers": {
       "type": "noul",
-      "instructions": "The answer responds to the question asked"
+      "instructions": "The answer gives a direct reply to the question that was asked, whether or not that reply is correct. Saying the information is not available, or talking about a different topic, does not count as a reply"
     }
   },
   "cases": [

@@ -48,23 +48,23 @@ TypeSafe's website advertises Jev as **193.6x faster and 444.6x cheaper** than L
 
 ### What one call costs in this suite
 
-Our full run used 598,723 input tokens for 1,352 calls, about **443 input tokens per call**, and cost **$0.025**. For the same job, a large LLM would read the same text and questions and write back a short JSON answer. The table assumes **443 input + 100 output tokens** for each LLM, at standard list prices (September 2026):
+A full run of the current suites uses 616,563 input tokens for 1,352 calls, about **456 input tokens per call**, and costs **$0.026**. For the same job, a large LLM would read the same text and questions and write back a short JSON answer. The table assumes **456 input + 100 output tokens** for each LLM, at standard list prices (September 2026):
 
 | Model | Price per 1M tokens (input / output) | Cost per call | 1,352 calls (one full run) | 1 million calls | vs Jev |
 |---|---|---|---|---|---|
-| **Jev** (TypeSafe) | $0.042 / not charged | $0.000019 | $0.025 | $19 | 1x |
-| GPT-6 Luna (OpenAI) | $0.10 / $0.50 | $0.000094 | $0.13 | $94 | 5x |
-| Claude Haiku 4.5 (Anthropic) | $1 / $5 | $0.00094 | $1.27 | $943 | 51x |
-| Claude Sonnet 5 (Anthropic) | $2 / $10 | $0.0019 | $2.55 | $1,886 | 101x |
-| GPT-6 Sol (OpenAI) | $2 / $10 | $0.0019 | $2.55 | $1,886 | 101x |
-| Claude Opus 5.5 (Anthropic) | $4 / $20 | $0.0038 | $5.10 | $3,772 | 203x |
-| GPT-6 Astra (OpenAI) | $10 / $50 | $0.0094 | $12.75 | $9,430 | 507x |
+| **Jev** (TypeSafe) | $0.042 / not charged | $0.000019 | $0.026 | $19 | 1x |
+| GPT-6 Luna (OpenAI) | $0.10 / $0.50 | $0.000096 | $0.13 | $96 | 5x |
+| Claude Haiku 4.5 (Anthropic) | $1 / $5 | $0.00096 | $1.29 | $956 | 50x |
+| Claude Sonnet 5 (Anthropic) | $2 / $10 | $0.0019 | $2.59 | $1,912 | 100x |
+| GPT-6 Sol (OpenAI) | $2 / $10 | $0.0019 | $2.59 | $1,912 | 100x |
+| Claude Opus 5.5 (Anthropic) | $4 / $20 | $0.0038 | $5.17 | $3,824 | 200x |
+| GPT-6 Astra (OpenAI) | $10 / $50 | $0.0096 | $12.93 | $9,560 | 499x |
 
-This is a floor for the LLMs. Reasoning models such as Claude Opus 5.5 and GPT-6 Astra also spend "thinking" tokens before they answer, and those are billed as output, so the real gap is usually wider. Against the flagship models, our estimate (203x to 507x) is in the same range as TypeSafe's 444.6x.
+This is a floor for the LLMs. Reasoning models such as Claude Opus 5.5 and GPT-6 Astra also spend "thinking" tokens before they answer, and those are billed as output, so the real gap is usually wider. Against the flagship models, our estimate (200x to 499x) is in the same range as TypeSafe's 444.6x.
 
 ### Speed
 
-- **Per call:** Jev answered in **425 ms** (median) and 627 ms at p95 in our run through the Vercel AI Gateway. TypeSafe's example puts an LLM at 8.566 s for a similar task, about 20x slower than our median.
+- **Per call:** Jev answered in **411 ms** (median) and 622 ms at p95 in our run through the Vercel AI Gateway. TypeSafe's example puts an LLM at 8.566 s for a similar task, about 21x slower than our median.
 - **Per run:** the limit is the gateway's rate limit, not Jev.
 
 | Access | Rate limit | Full run (1,352 calls) |
@@ -82,14 +82,14 @@ With direct access to the TypeSafe API, the whole suite would run about **40x fa
 |---|---|---|---|---|---|---|
 | 01 | `support_triage` | Triage | Right team, severity and refund request in a single support ticket | `team` choice · `severity` score · `wants_refund` yes/no | 132 | 95.6% |
 | 02 | `input_guardrails` | Guard the input | Jailbreak, dangerous request, medical advice, self-harm signal and severity, in one call | 4 yes/no · `severity` score | 125 | 97.8% |
-| 03 | `llm_answer_check` | Verify the output | Whether a chatbot answer is supported by the source, contradicts it, or doesn't answer the question | `supported` · `contradicts` · `answers` yes/no | 114 | 94.0% |
+| 03 | `llm_answer_check` | Verify the output | Whether a chatbot answer is supported by the source, contradicts it, or doesn't answer the question | `supported` · `contradicts` · `answers` yes/no | 114 | 99.1% |
 | 04 | `extraction_check` | Verify the output | Whether a field extracted from an invoice matches the document, including swapped digits and mixed-up fields | `matches` yes/no | 105 | 100% |
 | 05 | `rag_relevance` | Filter | How much a retrieved passage helps answer a question: directly, partly, same topic only, or not at all | `relevance` score | 108 | 94.4% |
 | 06 | `same_product` | Filter | Whether two catalog listings are the same product or a different variant (size, voltage, version, quantity, accessory) | `same_product` yes/no | 105 | 100% |
-| 07 | `model_routing` | Route | Canned answer, cheap LLM, advanced LLM or human agent, plus how hard the request is | `route` choice · `difficulty` score | 112 | 87.8% |
+| 07 | `model_routing` | Route | Canned answer, cheap LLM, advanced LLM or human agent, plus how hard the request is | `route` choice · `difficulty` score | 112 | 96.4% |
 | 08 | `marketplace_moderation` | Filter | Approve a listing or block it as counterfeit, prohibited or a misleading claim | `decision` choice | 106 | 98.1% |
 | 09 | `smart_home` | Triage | Turn a voice command into action + room, including negation and non-commands | `action` · `room` choice | 105 | 95.1% |
-| 10 | `churn_risk` | Triage | How close a customer is to canceling, and whether they mention a competitor or ask for a discount | `risk` score · 2 yes/no | 122 | 97.5% |
+| 10 | `churn_risk` | Triage | How close a customer is to canceling, and whether they mention a competitor or ask for a discount | `risk` score · 2 yes/no | 122 | 99.2% |
 | 11 | `resume_screening` | Filter | Score candidates on separate skills (Python, APIs, SQL, cloud) so code can weight them | 3 scores · `cloud` yes/no | 113 | 99.0% |
 | 12 | `known_weaknesses` | Limits | TypeSafe's own list of known failures: negation, counting, dates, hex colors, hidden instructions, noise, literal reading | one yes/no or choice per case | 105 | 100% |
 
@@ -105,41 +105,54 @@ For every run we measure:
 
 ## Results
 
-Run of 2026-09-24, all 1,352 cases, model `jev-latest`, through the Vercel AI Gateway.
+Run of 2026-09-24, all 1,352 cases, model `jev-latest`, through the Vercel AI Gateway. Suites 03, 07 and 10 were rerun the same day after rewording one weak question in each (see [Rewording three questions](#rewording-three-questions)).
 
 | Metric | Result |
 |---|---|
-| **Overall accuracy** | **96.4%** (2,738 of 2,839 answers) |
-| Choice questions | 97% (550 of 568) |
-| Yes / no questions | 98% (1,382 of 1,412) |
-| Score questions | 94% (806 of 859) |
-| Average confidence | 0.92 when right, 0.62 when wrong |
-| Latency per call | median 425 ms, p95 627 ms |
-| Cost of the full run | $0.025 (598,723 input tokens) |
+| **Overall accuracy** | **97.9%** (2,778 of 2,839 answers) |
+| Choice questions | 96.8% (550 of 568) |
+| Yes / no questions | 99.5% (1,405 of 1,412) |
+| Score questions | 95.8% (823 of 859) |
+| Average confidence | 0.93 when right, 0.67 when wrong |
+| Latency per call | median 411 ms, p95 622 ms |
+| Cost of the full run | $0.026 (616,563 input tokens) |
 
 ### Where Jev is reliable
 
 - **Mechanical checks are perfect:** extracted fields, same product, and every case on TypeSafe's own known-weakness list scored 100%.
-- **Classification is strong:** moderation 98.1%, resume screening 99.0%, churn risk 97.5%, input guardrails 97.8%.
-- **Routing decisions are right; difficulty scores aren't:** 23 of the 24 routing errors are in the `difficulty` score. The route itself was right in 111 of 112 cases.
-- **Confidence tracks errors:** wrong answers average 0.62 confidence against 0.92 for right ones, so a confidence cutoff sends most errors to a second opinion.
+- **Yes / no questions are near perfect once they're well defined:** 99.5% across all suites.
+- **Classification is strong:** LLM answer check 99.1%, churn risk 99.2%, resume screening 99.0%, moderation 98.1%, input guardrails 97.8%.
+- **Routing decisions are right:** the route was right in 111 of 112 cases.
+- **Confidence tracks errors:** wrong answers average 0.67 confidence against 0.93 for right ones, so a confidence cutoff sends most errors to a second opinion.
 
-### Where it fails, and why
+### Rewording three questions
 
-1. **"Does the answer respond to the question?" (18 of the 20 errors in `llm_answer_check`).** Jev counts "I don't know" as an answer (0.76 to 0.89) and scores wrong-but-on-topic answers just under 0.5. It mixes up "answered" and "answered correctly". The question needs rewording; `supported` and `contradicts` are fine.
-2. **Difficulty scores in routing (23 errors).** Jev gives near-zero difficulty to simple rewrites and translations, so our expected range is probably too high there. It also underrates short but hard technical questions (a JavaScript closure bug, a slow SQL subquery), which is a real error.
-3. **Scores run high.** Most severity and relevance errors are Jev going above the expected range, not below it.
-4. **Keywords mislead it.** "Refund" in a thank-you note became a refund request; "discount" in a coupon bug went to sales; a supplier's invoice to the company went to billing.
-5. **Unnamed competitors.** "A similar app" or "another carrier" counted as mentioning a competitor (0.99). The question should say "names a specific competing service".
-6. **Past events read as commands.** "Yesterday the light stayed on all night" became "turn off the light", with 0.98 confidence.
-7. **Counterfeit slang.** "Mirror line" and "top grade" listings were approved.
+The first full run scored 96.4%. Three questions caused most of the errors, and in each case the wording was ambiguous rather than Jev being wrong. We reworded only the question text, kept every case and expected answer the same, and reran those suites:
+
+| Question | Before | After | Accuracy of the suite |
+|---|---|---|---|
+| `answers` (LLM answer check) | "The answer responds to the question asked" | "…gives a direct reply to the question that was asked, whether or not that reply is correct. Saying the information is not available, or talking about a different topic, does not count as a reply" | 94.0% → **99.1%** |
+| `difficulty` (routing) | Levels "Trivial / Simple / Requires reasoning / Very complex" | "Judge the task itself, not how long or short the message is", with a concrete example for each level (look up a fact, short text task, expert reasoning, large multi-part work) | 87.8% → **96.4%** |
+| `mentions_competitor` (churn risk) | "The customer mentions a competing service" | "…names a specific competing company or service. Vague references without a name, such as 'another app' … do not count" | 97.5% → **99.2%** |
+
+Overall accuracy went from 96.4% to **97.9%**. The lesson: Jev follows the question literally, so precise wording with examples matters more than anything else.
+
+### Where it still fails
+
+1. **Scores run high.** Most severity, relevance and difficulty errors are Jev going above the expected range, not below it.
+2. **Keywords mislead it.** "Refund" in a thank-you note became a refund request; "discount" in a coupon bug went to sales; a supplier's invoice to the company went to billing.
+3. **Past events read as commands.** "Yesterday the light stayed on all night" became "turn off the light", with 0.98 confidence.
+4. **General rule over the exception.** When a chatbot answer applies a general rule and ignores an exception in the source (the late-rescheduling fee, the cats-only-on-Wednesdays rule), Jev sometimes rates it as supported.
+5. **Counterfeit slang.** "Mirror line" and "top grade" listings were approved.
+
+Three of the remaining routing errors are ours: under the new definitions, "give me a synonym", "say this in German" and "affect or effect?" are level-1 text tasks, but their expected range still says level 0.
 
 ### Recommendations
 
 - Use Jev to classify, check and filter. Use a large LLM for text, reasoning and anything with vague criteria.
+- Write every question precisely, with examples for each option or level, and test new wording against these suites.
 - Send answers below about 0.7 confidence to a larger model or a person.
 - Tune the cutoff of each yes / no question with this data instead of always using 0.5.
-- Reword the three weak questions (`answers`, `difficulty`, `mentions_competitor`) and rerun those suites.
 - Run `--repeat 3` to measure stability. This hasn't been done yet.
 
 ## Setup

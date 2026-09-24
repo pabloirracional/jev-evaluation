@@ -23,12 +23,12 @@
     },
     "difficulty": {
       "type": "score",
-      "instructions": "How hard the request is to handle",
+      "instructions": "How much expertise and work it takes to handle the request well. Judge the task itself, not how long or short the message is",
       "criteria": [
-        "Trivial, known answer",
-        "Simple",
-        "Requires reasoning or specialized knowledge",
-        "Very complex, many steps or a lot of content"
+        "Looking up a fixed fact the business already has written down, such as hours, address or phone number",
+        "A short text task anyone fluent could do, such as translating, correcting, rephrasing or summarizing a few lines",
+        "Needs expert knowledge or several steps of reasoning, even when the message is short, such as debugging code, tuning a query or doing financial math",
+        "Large or multi-part work, such as analyzing a long document, writing a full plan or designing a system"
       ]
     }
   },

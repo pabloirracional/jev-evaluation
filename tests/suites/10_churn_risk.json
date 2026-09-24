@@ -23,7 +23,7 @@
     },
     "mentions_competitor": {
       "type": "noul",
-      "instructions": "The customer mentions a competing service"
+      "instructions": "The customer names a specific competing company or service. Vague references without a name, such as 'another app', 'a cheaper option' or 'another carrier', do not count"
     },
     "asks_discount": {
       "type": "noul",
